@@ -15,6 +15,7 @@ parser.add_argument("--dry", action='store_true', help="Dry run")
 parser.add_argument("--force", action='store_true',
                     help="WARNING: force regeneration will delete old files")
 parser.add_argument("--hook", type=str, default="", help="Define fake functions")
+parser.add_argument("--realdllpath", type=str, default="", help="Define the path from which the wrapper dll should load the real dll")
 parser.add_argument("dll", type=str, help="The path to the dll file to wrap")
 args = parser.parse_args()
 
@@ -146,11 +147,17 @@ if __name__ == "__main__":
       Path(f"{dll_name}/empty.h").touch()
     shutil.copy("hook_macro.h", f"{dll_name}/")
 
+  if len(args.realdllpath) > 0:
+    realdllpath = args.realdllpath.replace("\\", "\\\\")
+  else:
+    realdllpath = f"real_{dll}"
+
   # write files
   def_content = def_template.render(ordinal_and_names=ordinal_and_names)
   write_file(f"{dll_name}/{dll_name}.def", def_content)
 
   cpp_content = cpp_template.render(dll=dll, architecture=arch, hook=args.hook,
+                                    realdllpath=realdllpath,
                                     ordinal_and_names=ordinal_and_names)
   write_file(f"{dll_name}/{dll_name}.cpp", cpp_content)
 

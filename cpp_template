@@ -46,7 +46,7 @@ inline void _hook_setup() {
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
   mHinst = hinstDLL;
   if (fdwReason == DLL_PROCESS_ATTACH) {
-    mHinstDLL = LoadLibrary("real_{{ dll }}");
+    mHinstDLL = LoadLibrary("{{ realdllpath }}");
     if (!mHinstDLL) {
       return FALSE;
     }
