@@ -127,6 +127,7 @@ if __name__ == "__main__":
   dll = os.path.basename(args.dll)
   dll_name = dll[:-4]
   arch = architecture(args.dll)
+  output_dir = f"{dll_name}_{arch}"
   ordinal_name_pairs = extract_symbols(args.dll)
   ordinals = [ordinal for ordinal, _ in ordinal_name_pairs]
   names = [name for _, name in ordinal_name_pairs]
@@ -135,17 +136,17 @@ if __name__ == "__main__":
 
   if not args.dry:
     if args.force:
-      if os.path.exists(dll_name):
-        shutil.rmtree(dll_name)
-    os.makedirs(dll_name)
-    shutil.copy(args.dll, f"{dll_name}/real_{dll}")
+      if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    os.makedirs(output_dir)
+    shutil.copy(args.dll, f"{output_dir}/real_{dll}")
     if args.hook != "":
-      shutil.copy(args.hook, f"{dll_name}/")
+      shutil.copy(args.hook, f"{output_dir}/")
     else:
       args.hook = "empty.h"
       from pathlib import Path
-      Path(f"{dll_name}/empty.h").touch()
-    shutil.copy("hook_macro.h", f"{dll_name}/")
+      Path(f"{output_dir}/empty.h").touch()
+    shutil.copy("hook_macro.h", f"{output_dir}/")
 
   if len(args.realdllpath) > 0:
     realdllpath = args.realdllpath.replace("\\", "\\\\")
@@ -154,17 +155,17 @@ if __name__ == "__main__":
 
   # write files
   def_content = def_template.render(ordinal_and_names=ordinal_and_names)
-  write_file(f"{dll_name}/{dll_name}.def", def_content)
+  write_file(f"{output_dir}/{dll_name}.def", def_content)
 
   cpp_content = cpp_template.render(dll=dll, architecture=arch, hook=args.hook,
                                     realdllpath=realdllpath,
                                     ordinal_and_names=ordinal_and_names)
-  write_file(f"{dll_name}/{dll_name}.cpp", cpp_content)
+  write_file(f"{output_dir}/{dll_name}.cpp", cpp_content)
 
   cmake_content = cmake_template.render(
       dll=dll_name, architecture=arch, hook=args.hook)
-  write_file(f"{dll_name}/CMakeLists.txt", cmake_content)
+  write_file(f"{output_dir}/CMakeLists.txt", cmake_content)
 
   if arch == "x64":
     asm_content = asm_template.render(ordinal_and_names=ordinal_and_names)
-    write_file(f"{dll_name}/{dll_name}_asm.asm", asm_content)
+    write_file(f"{output_dir}/{dll_name}_asm.asm", asm_content)
