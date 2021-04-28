@@ -153,17 +153,19 @@ if __name__ == "__main__":
   else:
     realdllpath = f"real_{dll}"
 
+  hook_file = os.path.basename(args.hook)
+
   # write files
   def_content = def_template.render(ordinal_and_names=ordinal_and_names)
   write_file(f"{output_dir}/{dll_name}.def", def_content)
 
-  cpp_content = cpp_template.render(dll=dll, architecture=arch, hook=args.hook,
+  cpp_content = cpp_template.render(dll=dll, architecture=arch, hook=hook_file,
                                     realdllpath=realdllpath,
                                     ordinal_and_names=ordinal_and_names)
   write_file(f"{output_dir}/{dll_name}.cpp", cpp_content)
 
   cmake_content = cmake_template.render(
-      dll=dll_name, architecture=arch, hook=args.hook)
+      dll=dll_name, architecture=arch, hook=hook_file)
   write_file(f"{output_dir}/CMakeLists.txt", cmake_content)
 
   if arch == "x64":
